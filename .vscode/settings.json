@@ -1,0 +1,10 @@
+{
+    "files.associations": {
+        "cmath": "cpp",
+        "thread": "cpp",
+        "qapplication": "cpp",
+        "qwidget": "cpp",
+        "qchartview": "cpp",
+        "qlineseries": "cpp"
+    }
+}
