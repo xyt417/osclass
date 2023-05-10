@@ -62,7 +62,6 @@ void InputWidget::CreateDirIU()
 	ShouldMind->move(100, 80);
 	ShouldMind->adjustSize();
 
-
 	//第二步，设置输入框
 	this->NewDirLineEdit = new QLineEdit("", this);
 

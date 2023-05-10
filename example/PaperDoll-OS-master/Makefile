@@ -190,6 +190,7 @@ Makefile: PaperDoll-OS-master.pro ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/w
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/qt_config.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/win32-g++/qmake.conf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/spec_post.prf \
+		.qmake.stash \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/exclusive_builds.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/toolchain.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/default_pre.prf \
@@ -205,6 +206,7 @@ Makefile: PaperDoll-OS-master.pro ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/w
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/resources.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/moc.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/win32/opengl.prf \
+		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/uic.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/qmake_use.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/file_copies.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/win32/windows.prf \
@@ -213,10 +215,10 @@ Makefile: PaperDoll-OS-master.pro ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/w
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/yacc.prf \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/lex.prf \
 		PaperDoll-OS-master.pro \
+		../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6Widgets.prl \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6Gui.prl \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6Core.prl \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6EntryPoint.prl \
-		.qmake.stash \
 		../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/build_pass.prf \
 		PaperDoll.qrc
 	$(QMAKE) -o Makefile PaperDoll-OS-master.pro
@@ -340,6 +342,7 @@ Makefile: PaperDoll-OS-master.pro ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/w
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/qt_config.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/win32-g++/qmake.conf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/spec_post.prf:
+.qmake.stash:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/exclusive_builds.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/toolchain.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/default_pre.prf:
@@ -355,6 +358,7 @@ Makefile: PaperDoll-OS-master.pro ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/w
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/resources.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/moc.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/win32/opengl.prf:
+../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/uic.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/qmake_use.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/file_copies.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/win32/windows.prf:
@@ -363,10 +367,10 @@ Makefile: PaperDoll-OS-master.pro ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/w
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/yacc.prf:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/lex.prf:
 PaperDoll-OS-master.pro:
+../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6Widgets.prl:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6Gui.prl:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6Core.prl:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/lib/Qt6EntryPoint.prl:
-.qmake.stash:
 ../../../../DEVKIT/Qt/6.5.0/mingw_64/mkspecs/features/build_pass.prf:
 PaperDoll.qrc:
 qmake: FORCE

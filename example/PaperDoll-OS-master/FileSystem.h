@@ -1,4 +1,3 @@
-#pragma 
 #define READ_T 0
 #define READ_E 1
 #define MAX_DIR_LEN 32
@@ -45,6 +44,7 @@ public:
 		}
 		ifs.close();
 	}
+    //
 	~BLOCK()
 	{
 		string fileName = diskLoc + "block" + to_string(this->blockSeq) + ".txt";

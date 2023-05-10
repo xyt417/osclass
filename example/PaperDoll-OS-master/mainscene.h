@@ -49,7 +49,7 @@ public://函数
 	void setPageLayout();//设置窗口和布局
 
 	void updateUI();
-
+	// 
 
 public://变量
 

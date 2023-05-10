@@ -13,8 +13,9 @@ public:
 	Button(QWidget* parent, QString btn_text);//设置按钮样式
 
 signals:
-
+	
 };
+
 
 #endif // BUTTON_H
 
