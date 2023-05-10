@@ -70,7 +70,7 @@ public:
         process_name = *processes.begin();
         processes.erase(processes.begin());
 
-        // 如果设备的使用列表为空，则将设备添加回可用设备列表中
+        // 如果设备的使用列表为空，则将设备添加回空闲设备列表中
         if (processes.empty()) {
             available_devices.push_back(device_name);
             occupied_devices.erase(device_name);

@@ -28,6 +28,7 @@ void printInfo(){
     device_queue.print_occupied_devices();
     cout << "======================" << endl;
 }
+
 // ===== Test =====
 int main() {
     allocateDevice("abc", "p1");
