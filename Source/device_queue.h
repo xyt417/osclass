@@ -15,7 +15,7 @@ using namespace std;
 // 设备队列类
 class DeviceQueue {
 private:
-    vector<string> devices = {"printer1", "printer2", "screen"}; 
+    vector<string> devices = {"printer1", "printer2", "screen"};  // 所有设备
 
     vector<string> available_devices;   // 可用设备列表
     map<string, vector<string>> occupied_devices;  // 正在使用的设备字典，键为设备名，值为使用该设备的进程列表
