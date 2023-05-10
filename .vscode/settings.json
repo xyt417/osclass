@@ -5,6 +5,7 @@
         "qapplication": "cpp",
         "qwidget": "cpp",
         "qchartview": "cpp",
-        "qlineseries": "cpp"
+        "qlineseries": "cpp",
+        "iostream": "cpp"
     }
 }
