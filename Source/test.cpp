@@ -1,52 +1,61 @@
 #include"device_queue.h"
-int main() {
-    DeviceQueue device_queue;
-
-    // æ·»åŠ è®¾å¤‡åˆ°è®¾å¤‡é˜Ÿåˆ—
-    device_queue.add_device("device1");
-    device_queue.add_device("device2");
-    device_queue.add_device("device3");
-
-    // è·å–å¯ç”¨è®¾å¤‡åˆ—è¡¨
-    vector<string> available_devices = device_queue.get_available_devices();
-    cout << "Available Devices: ";
-    for (string device_name : available_devices) {
-        cout << device_name << " ";
-    }
-    cout << endl;
-
-    // åˆ†é…è®¾å¤‡ç»™è¿›ç¨‹
-    bool result = device_queue.allocate_device("device1", "process1");
+DeviceQueue device_queue;
+void allocateDevice(string device, string process){
+    bool result = device_queue.allocate_device(device, process); 
     if (result) {
-        cout << "Device allocated to process" << endl;
+        cout << "½ø³Ì " << process << " ³É¹¦ÇëÇóµ½Éè±¸ " << device << endl;
+    }else {
+        cout << "Éè±¸ " << device << " ²»´æÔÚ" << endl;
     }
-    else {
-        cout << "Device not available" << endl;
+}
+void runDevice(string device){
+    string process;
+    device_queue.release_device(device, process);
+    if(process == NOEXIST) {
+        cout << "Éè±¸ " << device << " ²»´æÔÚ" << endl;
+        return;
     }
-
-    // è·å–æ­£åœ¨ä½¿ç”¨è®¾å¤‡çš„å­—å…¸
-    map<string, vector<string>> occupied_devices = device_queue.get_occupied_devices();
-    cout << "Occupied Devices: " << endl;
-    for (auto& pair : occupied_devices) {
-        string device_name = pair.first;
-        vector<string> processes = pair.second;
-        cout << device_name << ": ";
-        for (string process_name : processes) {
-            cout << process_name << " ";
-        }
-        cout << endl;
+    if(process == EMPTY){
+        cout <<  "Éè±¸ " << device << " µ±Ç°Ã»ÓĞÈÎÎñ" << endl;
+        return;
     }
-
-    // å›æ”¶è®¾å¤‡
-    device_queue.deallocate_device("device1", "process1");
-
-    // è·å–å¯ç”¨è®¾å¤‡åˆ—è¡¨
-    available_devices = device_queue.get_available_devices();
-    cout << "Available Devices: ";
-    for (string device_name : available_devices) {
-        cout << device_name << " ";
-    }
-    cout << endl;
-
+    cout << "Éè±¸ " << device << " ÒÑÖ´ĞĞ½ø³Ì " << process << " µÄÈÎÎñ" << endl;
+    
+}
+void printInfo(){
+    cout << "======= status =======" << endl;
+    device_queue.print_avaliable_devices();
+    device_queue.print_occupied_devices();
+    cout << "======================" << endl;
+}
+// ===== Test =====
+int main() {
+    allocateDevice("abc", "p1");
+    allocateDevice("printer2", "p1");
+    allocateDevice("printer1", "p2");
+    allocateDevice("screen", "p1");
+    allocateDevice("screen", "p2");
+    printInfo();
+    runDevice("abc");
+    runDevice("printer1");
+    runDevice("printer1");
+    runDevice("printer2");
+    runDevice("printer2");
+    runDevice("screen");
+    runDevice("screen");
+    printInfo();
+    allocateDevice("printer2", "p1");
+    allocateDevice("printer1", "p2");
+    allocateDevice("printer2", "p1");
+    allocateDevice("printer1", "p2");
+    printInfo();
+    runDevice("printer1");
+    runDevice("printer2");
+    runDevice("printer1");
+    runDevice("printer2");
+    runDevice("printer1");
+    runDevice("printer2");
+    printInfo();
     return 0;
 }
+
