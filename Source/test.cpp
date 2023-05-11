@@ -1,6 +1,5 @@
-#include"device_queue.h"
-DeviceQueue device_queue;
-void allocateDevice(string device, string process){
+#include <device.h>
+void allocateDevice(string device, string process, DeviceQueue &device_queue){
     bool result = device_queue.allocate_device(device, process); 
     if (result) {
         cout << "进程 " << process << " 成功请求到设备 " << device << endl;
@@ -8,7 +7,7 @@ void allocateDevice(string device, string process){
         cout << "设备 " << device << " 不存在" << endl;
     }
 }
-void runDevice(string device){
+void runDevice(string device, DeviceQueue &device_queue){
     string process;
     device_queue.release_device(device, process);
     if(process == NOEXIST) {
@@ -22,41 +21,51 @@ void runDevice(string device){
     cout << "设备 " << device << " 已执行进程 " << process << " 的任务" << endl;
     
 }
-void printInfo(){
-    cout << "======= status =======" << endl;
+void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
+    cout << "==== DeviceQueue Status =====" << endl;
     device_queue.print_avaliable_devices();
     device_queue.print_occupied_devices();
-    cout << "======================" << endl;
+    cout << "======= Device Table ========" << endl;
+    device_table.printInfo();
+    cout << "=============================" << endl;
 }
 
 // ===== Test =====
 int main() {
-    allocateDevice("abc", "p1");
-    allocateDevice("printer2", "p1");
-    allocateDevice("printer1", "p2");
-    allocateDevice("screen", "p1");
-    allocateDevice("screen", "p2");
-    printInfo();
-    runDevice("abc");
-    runDevice("printer1");
-    runDevice("printer1");
-    runDevice("printer2");
-    runDevice("printer2");
-    runDevice("screen");
-    runDevice("screen");
-    printInfo();
-    allocateDevice("printer2", "p1");
-    allocateDevice("printer1", "p2");
-    allocateDevice("printer2", "p1");
-    allocateDevice("printer1", "p2");
-    printInfo();
-    runDevice("printer1");
-    runDevice("printer2");
-    runDevice("printer1");
-    runDevice("printer2");
-    runDevice("printer1");
-    runDevice("printer2");
-    printInfo();
+    DeviceTable device_table;
+    device_table.add_device("printer1", "printer");
+    device_table.add_device("printer2", "printer");
+    device_table.add_device("screen", "screen");
+    device_table.add_device("abc", "abc");
+    device_table.remove_device("abc");
+    DeviceQueue device_queue(device_table);
+    cout << "device number: " << device_table.dev_num() << endl;
+    printInfo(device_queue, device_table);
+    allocateDevice("abc", "p1", device_queue);
+    allocateDevice("printer2", "p1", device_queue);
+    allocateDevice("printer1", "p2", device_queue);
+    allocateDevice("screen", "p1", device_queue);
+    allocateDevice("screen", "p2", device_queue);
+    printInfo(device_queue, device_table);
+    runDevice("abc", device_queue);
+    runDevice("printer1", device_queue);
+    runDevice("printer1", device_queue);
+    runDevice("printer2", device_queue);
+    runDevice("printer2", device_queue);
+    runDevice("screen", device_queue);
+    printInfo(device_queue, device_table);
+    allocateDevice("printer2", "p1", device_queue);
+    allocateDevice("printer2", "p2", device_queue);
+    allocateDevice("printer1", "p2", device_queue);
+    allocateDevice("printer1", "p1", device_queue);
+    printInfo(device_queue, device_table);
+    runDevice("printer1", device_queue);
+    runDevice("printer2", device_queue);
+    printInfo(device_queue, device_table);
+    runDevice("printer1", device_queue);
+    runDevice("printer2", device_queue);
+    runDevice("screen", device_queue);
+    printInfo(device_queue, device_table);
     return 0;
 }
 

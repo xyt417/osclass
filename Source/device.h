@@ -9,27 +9,106 @@
 
 using namespace std;
 
+#define FREE 0
+#define BUSY 1
+
 #define NOEXIST "noexist"
 #define EMPTY "empty"
+
+
+
+// 设备信息表
+class DeviceTable {
+public:
+    struct Device {
+        string name;
+        string type;
+        int status;
+        string pname;   //占用或将占用的进程
+    };
+
+private:
+    int devNum;
+    vector<Device> deviceList;
+
+public:
+    DeviceTable() : devNum(0) {}
+
+    bool add_device(string name, string type) {
+        for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
+            if (it->name == name) {
+                return false;
+            }
+        }
+        Device new_device {name, type, FREE, "none"};
+        deviceList.push_back(new_device);
+        devNum ++;
+        return true;
+    }
+
+    bool remove_device(string name) {
+        for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
+            if (it->name == name) {
+                deviceList.erase(it);
+                devNum --;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    bool change_device_status(string name, int status, string pname) {
+        for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
+            if (it->name == name) {
+                it->status = status;
+                if(status == FREE)
+                    it->pname = "none";
+                else
+                    it->pname = pname;
+                return true;
+            }
+        }
+        return false;
+    }
+
+    void get_names(vector<string> &names) {
+        for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
+            names.push_back(it->name);
+        }
+    }
+
+    int dev_num() {
+        return devNum;
+    }
+
+    void printInfo() {
+        cout << "|DeviceName" << "|Type" << "|Status" << "|process|\n";
+        for (auto it : deviceList) {
+            cout << "  " << it.name << "  " << it.type << "  " << (it.status ? "busy" : "free") << "  " << it.pname << "  \n";
+        }
+    }
+};
+
 
 // 设备队列类
 class DeviceQueue {
 private:
-    vector<string> devices = {"printer1", "printer2", "screen"};  // 所有设备
+    DeviceTable &deviceTable;                       // 设备信息表
 
-    vector<string> available_devices;   // 可用设备列表
-    map<string, vector<string>> occupied_devices;  // 正在使用的设备字典，键为设备名，值为使用该设备的进程列表
-
+    vector<string> devices;                         // 设备名列表
+    vector<string> available_devices;               // 可用设备列表
+    map<string, vector<string>> occupied_devices;   // 正在使用的设备字典，键为设备名，值为使用该设备的进程列表
 
 public:
-    DeviceQueue() {
+    DeviceQueue(DeviceTable &_deviceTable) : deviceTable(_deviceTable) {
         //初始化空闲设备列表
+        deviceTable.get_names(devices);
         for(string device : devices){
             available_devices.push_back(device);
         }
     }
 
-    // 分配设备给进程 (设备名称，进程名称)
+    // 分配设备给进程 (设备名称，进程名称，备用)
     bool allocate_device(string device_name, string process_name, string info = "") {
         // 如果设备不存在，则返回 false
         vector<string>::iterator it = find(devices.begin(), devices.end(), device_name);
@@ -46,11 +125,12 @@ public:
             it = find(available_devices.begin(), available_devices.end(), device_name);
             available_devices.erase(it);
             occupied_devices[device_name] = vector<string>{process_name};
+            deviceTable.change_device_status(device_name, BUSY, process_name);
         }
         return true;
     }
 
-    // 释放设备 (设备名称, 释放的设备名称)
+    // 释放设备 (设备名称, 确认结束任务对应进程名，备用)
     bool release_device(string device_name, string &process_name, string info = "") {
         // 如果设备不存在，返回 false
         vector<string>::iterator it = find(devices.begin(), devices.end(), device_name);
@@ -74,6 +154,9 @@ public:
         if (processes.empty()) {
             available_devices.push_back(device_name);
             occupied_devices.erase(device_name);
+            deviceTable.change_device_status(device_name, FREE, "");
+        } else {
+            deviceTable.change_device_status(device_name, BUSY, *processes.begin());
         }
         return true;
     }
