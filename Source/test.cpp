@@ -1,10 +1,10 @@
 #include <device.h>
-void allocateDevice(string device, string process, DeviceQueue &device_queue){
-    bool result = device_queue.allocate_device(device, process); 
+void allocateDevice(string device, string process, DeviceQueue &device_queue, string request = ""){
+    bool result = device_queue.allocate_device(device, process, request); 
     if (result) {
         cout << "进程 " << process << " 成功请求到设备 " << device << endl;
     }else {
-        cout << "设备 " << device << " 不存在" << endl;
+        cout << "设备类型 " << device << " 不存在" << endl;
     }
 }
 void runDevice(string device, DeviceQueue &device_queue){
@@ -41,12 +41,17 @@ int main() {
     DeviceQueue device_queue(device_table);
     cout << "device number: " << device_table.dev_num() << endl;
     printInfo(device_queue, device_table);
+
     allocateDevice("abc", "p1", device_queue);
-    allocateDevice("printer2", "p1", device_queue);
-    allocateDevice("printer1", "p2", device_queue);
+    allocateDevice("printer", "p1", device_queue);
+    allocateDevice("printer", "p2", device_queue);
+    allocateDevice("printer", "p3", device_queue);
+    allocateDevice("printer", "p4", device_queue);
+    allocateDevice("printer", "p5", device_queue, "print AAA");
     allocateDevice("screen", "p1", device_queue);
     allocateDevice("screen", "p2", device_queue);
     printInfo(device_queue, device_table);
+
     runDevice("abc", device_queue);
     runDevice("printer1", device_queue);
     runDevice("printer1", device_queue);
@@ -54,18 +59,15 @@ int main() {
     runDevice("printer2", device_queue);
     runDevice("screen", device_queue);
     printInfo(device_queue, device_table);
-    allocateDevice("printer2", "p1", device_queue);
-    allocateDevice("printer2", "p2", device_queue);
-    allocateDevice("printer1", "p2", device_queue);
-    allocateDevice("printer1", "p1", device_queue);
-    printInfo(device_queue, device_table);
-    runDevice("printer1", device_queue);
-    runDevice("printer2", device_queue);
-    printInfo(device_queue, device_table);
-    runDevice("printer1", device_queue);
-    runDevice("printer2", device_queue);
+
+    allocateDevice("printer", "p1", device_queue);
+    allocateDevice("printer", "p2", device_queue);
+    runDevice("screen", device_queue);
     runDevice("screen", device_queue);
     printInfo(device_queue, device_table);
+
+
+
     return 0;
 }
 

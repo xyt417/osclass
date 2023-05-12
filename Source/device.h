@@ -16,6 +16,10 @@ using namespace std;
 #define EMPTY "empty"
 
 
+struct DevRequest {
+    string pname;
+    string requestStr;
+};
 
 // 设备信息表
 class DeviceTable {
@@ -33,6 +37,16 @@ private:
 
 public:
     DeviceTable() : devNum(0) {}
+
+    Device operator[](string name){
+        for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
+            if (it->name == name) {
+                return *it;
+            }
+        }
+        Device temp {"none", "none", 0, "none"};
+        return temp;
+    }
 
     bool add_device(string name, string type) {
         for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
@@ -77,6 +91,15 @@ public:
         }
     }
 
+    void get_types(vector<string> &types) {
+        for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
+            types.push_back((*it).type);
+        }
+        sort(types.begin(), types.end());
+        vector<string>::iterator new_end = unique(types.begin(), types.end());
+        types.erase(new_end, types.end());
+    }
+
     int dev_num() {
         return devNum;
     }
@@ -96,8 +119,9 @@ private:
     DeviceTable &deviceTable;                       // 设备信息表
 
     vector<string> devices;                         // 设备名列表
+    vector<string> types;                           // 设备类型列表
     vector<string> available_devices;               // 可用设备列表
-    map<string, vector<string>> occupied_devices;   // 正在使用的设备字典，键为设备名，值为使用该设备的进程列表
+    map<string, vector<DevRequest>> occupied_devices;   // 正在使用的设备字典，键为设备名，值为使用该设备的进程列表
 
 public:
     DeviceQueue(DeviceTable &_deviceTable) : deviceTable(_deviceTable) {
@@ -106,10 +130,12 @@ public:
         for(string device : devices){
             available_devices.push_back(device);
         }
+        deviceTable.get_types(types);
+        // for (auto it : types) cout << it << " ";
     }
 
-    // 分配设备给进程 (设备名称，进程名称，备用)
-    bool allocate_device(string device_name, string process_name, string info = "") {
+    // 分配设备给进程 (设备名称，进程名称，请求信息)
+    bool _allocate_device(string device_name, string process_name, string request) {
         // 如果设备不存在，则返回 false
         vector<string>::iterator it = find(devices.begin(), devices.end(), device_name);
         if (it == devices.end()) {
@@ -118,20 +144,48 @@ public:
 
         // 如果设备已经被使用，则将进程添加到设备的使用列表中
         if (occupied_devices.find(device_name) != occupied_devices.end()) {
-            occupied_devices[device_name].push_back(process_name);
+            occupied_devices[device_name].push_back(DevRequest{process_name, request});
         }
         // 如果设备未被使用，则创建一个新的使用列表并添加进程，并将该设备移出空闲列表
         else {
             it = find(available_devices.begin(), available_devices.end(), device_name);
             available_devices.erase(it);
-            occupied_devices[device_name] = vector<string>{process_name};
+            occupied_devices[device_name] = vector<DevRequest>{};
+            occupied_devices[device_name].push_back(DevRequest{process_name, request});
             deviceTable.change_device_status(device_name, BUSY, process_name);
         }
         return true;
     }
 
+    bool allocate_device(string device_type, string process_name, string request = "") {
+        // 不存在该类型设备
+        vector<string>::iterator itt = find(types.begin(), types.end(), device_type);
+        if (itt == types.end()) {
+            return false;
+        }
+        // 存在空闲设备
+        for(auto it = available_devices.begin(); it != available_devices.end(); ++ it) {
+            if(deviceTable[*it].type == device_type) {
+                return _allocate_device(*it, process_name, request);
+            }
+        }
+
+        // 不存在空闲设备，找到任务队列最短设备
+        int len = 99999;
+        string device_name;
+        auto it = occupied_devices.begin();
+        for(; it != occupied_devices.end(); ++ it) {
+            if(deviceTable[(*it).first].type == device_type && (*it).second.size() < len) {
+                len = (*it).second.size();
+                device_name = (*it).first;
+            }
+        }
+
+        return _allocate_device(device_name, process_name, request);
+    }
+
     // 释放设备 (设备名称, 确认结束任务对应进程名，备用)
-    bool release_device(string device_name, string &process_name, string info = "") {
+    bool release_device(string device_name, string &process_name) {
         // 如果设备不存在，返回 false
         vector<string>::iterator it = find(devices.begin(), devices.end(), device_name);
         if (it == devices.end()) {
@@ -146,8 +200,8 @@ public:
         }
 
         // 将进程从设备的使用列表中删除
-        vector<string>& processes = occupied_devices[device_name];
-        process_name = *processes.begin();
+        vector<DevRequest>& processes = occupied_devices[device_name];
+        process_name = (*processes.begin()).pname;
         processes.erase(processes.begin());
 
         // 如果设备的使用列表为空，则将设备添加回空闲设备列表中
@@ -156,7 +210,7 @@ public:
             occupied_devices.erase(device_name);
             deviceTable.change_device_status(device_name, FREE, "");
         } else {
-            deviceTable.change_device_status(device_name, BUSY, *processes.begin());
+            deviceTable.change_device_status(device_name, BUSY, (*processes.begin()).pname);
         }
         return true;
     }
@@ -167,7 +221,7 @@ public:
     }
 
     // 获取正在使用设备的字典
-    map<string, vector<string>> get_occupied_devices() {
+    map<string, vector<DevRequest>> get_occupied_devices() {
         return occupied_devices;
     }
 
@@ -183,14 +237,14 @@ public:
 
     // 打印正在使用设备的字典
     void print_occupied_devices() {
-        map<string, vector<string>> occupied_devices = get_occupied_devices();
+        map<string, vector<DevRequest>> occupied_devices = get_occupied_devices();
         cout << "Occupied Devices: " << '\n';
         for (auto& pair : occupied_devices) {
             string device_name = pair.first;
-            vector<string> processes = pair.second;
+            vector<DevRequest> processes = pair.second;
             cout << device_name << ": ";
-            for (string process_name : processes) {
-                cout << process_name << " ";
+            for (DevRequest process : processes) {
+                cout << process.pname << "[" << process.requestStr << "]" << " ";
             }
             cout << '\n';
         }
@@ -198,3 +252,5 @@ public:
 };
 
 #endif
+
+// thinking: 进程每次申请一个操作
