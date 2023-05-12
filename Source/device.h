@@ -134,7 +134,7 @@ public:
         // for (auto it : types) cout << it << " ";
     }
 
-    // 分配设备给进程 (设备名称，进程名称，请求信息)
+
     bool _allocate_device(string device_name, string process_name, string request) {
         // 如果设备不存在，则返回 false
         vector<string>::iterator it = find(devices.begin(), devices.end(), device_name);
@@ -157,6 +157,7 @@ public:
         return true;
     }
 
+    // 分配设备给进程 (设备类型，进程名称，任务信息)
     bool allocate_device(string device_type, string process_name, string request = "") {
         // 不存在该类型设备
         vector<string>::iterator itt = find(types.begin(), types.end(), device_type);
