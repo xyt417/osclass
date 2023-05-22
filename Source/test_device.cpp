@@ -19,7 +19,6 @@ void runDevice(string device, DeviceQueue &device_queue){
         return;
     }
     cout << "设备 " << device << " 已执行进程 " << process << " 的任务" << endl;
-    
 }
 void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
     cout << "==== DeviceQueue Status =====" << endl;

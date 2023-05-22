@@ -31,7 +31,7 @@ public:
         string pname;   //占用或将占用的进程
     };
 
-private:
+public:
     int devNum;
     vector<Device> deviceList;
 
@@ -172,7 +172,7 @@ public:
         }
 
         // 不存在空闲设备，找到任务队列最短设备
-        int len = 99999;
+        long long unsigned int len = 99999;
         string device_name;
         auto it = occupied_devices.begin();
         for(; it != occupied_devices.end(); ++ it) {

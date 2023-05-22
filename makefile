@@ -1,5 +1,5 @@
 DIR = Source
-SOURCE = $(DIR)/test.cpp
-Test: $(DIR)/test.cpp $(DIR)/device.h
+SOURCE = $(DIR)/test_device.cpp
+Test:
 	g++  -I Source $(SOURCE) -o test.exe
 	./test.exe
