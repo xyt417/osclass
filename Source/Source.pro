@@ -5,6 +5,7 @@
 TEMPLATE = app
 TARGET = Source
 INCLUDEPATH += .
+CONFIG += console # 控制台输出
 QT += widgets
 
 # You can make your code fail to compile if you use deprecated APIs.

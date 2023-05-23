@@ -1,48 +1,64 @@
 #include<deviceWidget.h>
 #include<device.h>
 
-void runDevice(string device, DeviceQueue &device_queue){
+void allocateDevice(string device, string process, DeviceQueue &deviceQueue, string request = ""){
+    bool result = deviceQueue.allocate_device(device, process, request); 
+    if (result) {
+        cout << "½ø³Ì " << process << " ³É¹¦ÇëÇóµ½Éè±¸ " << device << endl;
+    }else {
+        cout << "Éè±¸ÀàÐÍ " << device << " ²»´æÔÚ" << endl;
+    }
+}
+void runDevice(string device, DeviceQueue &deviceQueue){
     string process;
-    device_queue.release_device(device, process);
+    deviceQueue.release_device(device, process);
     if(process == NOEXIST) {
-        cout << "è®¾å¤‡ " << device << " ä¸å­˜åœ¨" << endl;
+        cout << "Éè±¸ " << device << " ²»´æÔÚ" << endl;
         return;
     }
     if(process == EMPTY){
-        cout <<  "è®¾å¤‡ " << device << " å½“å‰æ²¡æœ‰ä»»åŠ¡" << endl;
+        cout <<  "Éè±¸ " << device << " µ±Ç°Ã»ÓÐÈÎÎñ" << endl;
         return;
     }
-    cout << "è®¾å¤‡ " << device << " å·²æ‰§è¡Œè¿›ç¨‹ " << process << " çš„ä»»åŠ¡" << endl;
+    cout << "Éè±¸ " << device << " ÒÑÖ´ÐÐ½ø³Ì " << process << " µÄÈÎÎñ" << endl;
+}
+void printInfo(DeviceQueue &deviceQueue, DeviceTable &deviceTable){
+    cout << "==== DeviceQueue Status =====" << endl;
+    deviceQueue.print_avaliable_devices();
+    deviceQueue.print_occupied_devices();
+    cout << "======= Device Table ========" << endl;
+    deviceTable.printInfo();
+    cout << "=============================" << endl;
 }
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
 
-    // åˆ›å»ºè®¾å¤‡ä¿¡æ¯è¡¨å¹¶æ·»åŠ è®¾å¤‡
+    // ´´½¨Éè±¸ÐÅÏ¢±í²¢Ìí¼ÓÉè±¸
     DeviceTable deviceTable;
     deviceTable.add_device("screen1", "screen");
     deviceTable.add_device("printer1", "printer");
-    // ä½¿ç”¨è®¾å¤‡ä¿¡æ¯è¡¨åˆå§‹åŒ–è®¾å¤‡é˜Ÿåˆ—
+    deviceTable.add_device("printer2", "printer");
+    deviceTable.add_device("printer3", "printer");
+    // Ê¹ÓÃÉè±¸ÐÅÏ¢±í³õÊ¼»¯Éè±¸¶ÓÁÐ
     DeviceQueue deviceQueue(deviceTable);
 
-    // åˆ†é…è®¾å¤‡ç»™è¿›ç¨‹
-    deviceQueue.allocate_device("screen", "process1");
-    deviceQueue.allocate_device("printer", "process2");
-    deviceQueue.allocate_device("printer", "process3");
-    deviceQueue.allocate_device("printer", "process4");
-    deviceQueue.allocate_device("printer", "process5");
-    deviceQueue.allocate_device("printer", "process6");
-    
-    for(int i = 0; i < 5; ++ i){
-        runDevice("printer1", deviceQueue);
+    int n = 100, m = 100;
+    while(n --){
+        deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p3", "print,p3: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p4", "print,p4: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p5", "print,p5: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p6", "print,p6: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string((m - n) * 2 - 1));
+        deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string((m - n) * 2));
     }
 
-    // åˆ›å»ºä¸»çª—å£
-    MainWindow mainWindow(deviceTable, deviceQueue);
+    // ´´½¨Ö÷´°¿Ú
+    MainWindow mainWindow(deviceTable, deviceQueue, 1);
     mainWindow.show();
-
-
 
     return app.exec();
 }

@@ -7,36 +7,58 @@
 #include <QTimer>
 #include <QMap>
 #include <QThread>
+#include <QTextEdit>
+#include <QPlainTextEdit>
+#include <QScrollBar>
 #include "device.h"
 
-// è‡ªå®šä¹‰è®¾å¤‡çª—å£ç±»
+// ×Ô¶¨ÒåÉè±¸´°¿ÚÀà
 class DeviceWindow : public QMainWindow {
     Q_OBJECT
+
 public:
-    explicit DeviceWindow(QWidget *parent = nullptr) : QMainWindow(parent) {
-        setWindowTitle("Device Window");
+    explicit DeviceWindow(QString deviceType = "none", QString deviceName = "none", QWidget *parent = nullptr) : QMainWindow(parent) {
+        setWindowTitle(deviceName);
         centralWidget = new QWidget(this);
         setCentralWidget(centralWidget);
         layout = new QVBoxLayout(centralWidget);
-        statusLabel = new QLabel("Status: Free", centralWidget);
+
+        // ÏÔÊ¾²¿¼ş
+        printerWidget = new QPlainTextEdit(centralWidget);
+        if(deviceType == "printer")
+            printerWidget->setReadOnly(true);
+        layout->addWidget(printerWidget);
+        // ×´Ì¬±êÇ©
+        statusLabel = new QLabel("Status: Free", this);
+        statusLabel->setAlignment(Qt::AlignBottom | Qt::AlignRight);
         layout->addWidget(statusLabel);
+
+        layout->setAlignment(statusLabel, Qt::AlignBottom | Qt::AlignRight);
     }
 
     void setStatus(bool isBusy) {
         statusLabel->setText("Status: " + QString(isBusy ? "Busy" : "Free"));
     }
 
+    void print(const QString& text) {
+        printerWidget->insertPlainText(text + '\n');
+        printerWidget->verticalScrollBar()->setValue(printerWidget->verticalScrollBar()->maximum());
+    }
+
 private:
-    QWidget *centralWidget; // ä¸­å¿ƒçª—å£
-    QVBoxLayout *layout; // å¸ƒå±€ç®¡ç†å™¨
-    QLabel *statusLabel; // çŠ¶æ€æ ‡ç­¾
+    QWidget *centralWidget; // ÖĞĞÄ´°¿Ú
+    QVBoxLayout *layout; // ²¼¾Ö¹ÜÀíÆ÷
+    QPlainTextEdit *printerWidget; // ´òÓ¡»ú×é¼ş
+    QLabel *statusLabel; // ×´Ì¬±êÇ©
 };
 
-// ä¸»çª—å£ç±»
+
+// Ö÷´°¿ÚÀà
 class MainWindow : public QMainWindow {
     Q_OBJECT
+
 public:
-    explicit MainWindow(DeviceTable &deviceTable, DeviceQueue &deviceQueue, QWidget *parent = nullptr)
+    explicit MainWindow(DeviceTable &deviceTable, DeviceQueue &deviceQueue, int logger = 0, QWidget *parent = nullptr)
      : QMainWindow(parent), deviceTable(deviceTable), deviceQueue(deviceQueue) {
         setWindowTitle("Main Window");
         centralWidget = new QWidget(this);
@@ -45,49 +67,102 @@ public:
         statusLabel = new QLabel(centralWidget);
         layout->addWidget(statusLabel);
 
-        // åˆ›å»ºè®¾å¤‡çª—å£
+        // ´´½¨Éè±¸´°¿Ú
         createDeviceWindows();
-        
-        // è®¾ç½®å®šæ—¶å™¨ï¼Œå®šæ—¶æ›´æ–°è®¾å¤‡çŠ¶æ€
+        updateDeviceStatus();
+
+        // ÉèÖÃ¶¨Ê±Æ÷
         timer = new QTimer(this);
-        connect(timer, SIGNAL(timeout()), this, SLOT(updateDeviceStatus()));
-        timer->start(1000); // æ¯ç§’æ›´æ–°ä¸€æ¬¡
+        connect(timer, SIGNAL(timeout()), this, SLOT(running()));
+        timer->start(100); // Ã¿1/10¸üĞÂ1´Î
+
+    }
+
+    void enableLogger() {logger = 1;}
+    void disableLogger() {logger = 0;}
+
+    string argi(string request, int index){
+        int i = 1;
+        int start = 0;
+        int end = request.find(",");
+        while(i < index){
+            start = request.find(",", start) + 1;
+            end = request.find(",", start);
+            ++ i;
+        }
+        return request.substr(start, end - start);
     }
 
 public slots:
     void updateDeviceStatus() {
+        // ¸üĞÂÉè±¸×´Ì¬ÏÔÊ¾
         QString statusText;
         for (const auto &device : deviceTable.deviceList) {
             statusText += "Device Name: " + QString::fromStdString(device.name) + "  |  Type: "\
              + QString::fromStdString(device.type) + "  |  Status: " + (device.status ? "Busy" : "Free")\
              + "  |  Process: " + QString::fromStdString(device.pname) + "\n";
             if (device.type == "screen") {
-                // æ›´æ–°å±å¹•è®¾å¤‡çª—å£çš„çŠ¶æ€
+                // ¸üĞÂÆÁÄ»Éè±¸´°¿ÚµÄ×´Ì¬
                 screenWindows[device.name]->setStatus(device.status);
             } else if (device.type == "printer") {
-                // æ›´æ–°æ‰“å°æœºè®¾å¤‡çª—å£çš„çŠ¶æ€
+                // ¸üĞÂ´òÓ¡»úÉè±¸´°¿ÚµÄ×´Ì¬
                 printerWindows[device.name]->setStatus(device.status);
             }
         }
         statusLabel->setText(statusText);
     }
 
+
+    void running(){
+        // »ñÈ¡occupied_devices
+        map<string, vector<DevRequest>> occupied_devices = deviceQueue.get_occupied_devices();
+        for(auto device : occupied_devices){
+            string device_name = device.first;
+            vector<DevRequest> requests = device.second;
+            if(requests.size() == 0) continue;
+            string process_name = requests[0].pname;
+            string request = requests[0].requestStr;
+            // screen
+            if(deviceTable[device_name].type == "screen"){
+                // request = "print,text"
+                // ÆÁÄ»´òÓ¡
+                if(request.find("print") != string::npos){
+                    if(logger) cout << "Éè±¸ " << device_name << " Ö´ĞĞ½ø³Ì " << process_name << " µÄÈÎÎñ:[" << request << "]\n";
+                    screenWindows["screen1"]->print(QString::fromStdString(argi(request, 2)));
+                }
+            }else if(deviceTable[device_name].type == "printer"){
+                // request = "print,p1: text"
+                // ´òÓ¡»ú´òÓ¡
+                if(request.find("print") != string::npos){
+                    if(logger) cout << "Éè±¸ " << device_name << " Ö´ĞĞ½ø³Ì " << process_name << " µÄÈÎÎñ:[" << request << "]\n";
+                    printerWindows[device_name]->print(QString::fromStdString(argi(request, 2)));
+                }
+            }
+            // ÊÍ·ÅÉè±¸
+            deviceQueue.release_device(device_name, process_name);
+        }
+
+        updateDeviceStatus();
+    }    
+
 private:
     void createDeviceWindows() {
         for (const auto &device : deviceTable.deviceList) {
             if (device.type == "screen") {
-                // åˆ›å»ºå±å¹•è®¾å¤‡çª—å£
-                DeviceWindow *screenWindow = new DeviceWindow(this);
+                // ´´½¨ÆÁÄ»Éè±¸´°¿Ú
+                DeviceWindow *screenWindow = new DeviceWindow("screen", QString::fromStdString(device.name), this);
                 screenWindows[device.name] = screenWindow;
                 screenWindow->show();
             } else if (device.type == "printer") {
-                // åˆ›å»ºæ‰“å°æœºè®¾å¤‡çª—å£
-                DeviceWindow *printerWindow = new DeviceWindow(this);
+                // ´´½¨´òÓ¡»úÉè±¸´°¿Ú
+                DeviceWindow *printerWindow = new DeviceWindow("printer", QString::fromStdString(device.name), this);
                 printerWindows[device.name] = printerWindow;
                 printerWindow->show();
             }
         }
     }
+
+    int logger = 0;
 
     QWidget *centralWidget;
     QVBoxLayout *layout;
@@ -95,6 +170,6 @@ private:
     QTimer *timer;
     DeviceTable &deviceTable;
     DeviceQueue &deviceQueue;
-    QMap<string, DeviceWindow*> screenWindows; // å±å¹•è®¾å¤‡çª—å£
-    QMap<string, DeviceWindow*> printerWindows; // æ‰“å°æœºè®¾å¤‡çª—å£
+    QMap<string, DeviceWindow*> screenWindows; // ÆÁÄ»Éè±¸´°¿Ú
+    QMap<string, DeviceWindow*> printerWindows; // ´òÓ¡»úÉè±¸´°¿Ú
 };

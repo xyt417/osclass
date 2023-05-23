@@ -217,12 +217,12 @@ public:
     }
 
     // 获取可用设备列表
-    vector<string> get_available_devices() {
+    vector<string> &get_available_devices() {
         return available_devices;
     }
 
     // 获取正在使用设备的字典
-    map<string, vector<DevRequest>> get_occupied_devices() {
+    map<string, vector<DevRequest>> &get_occupied_devices() {
         return occupied_devices;
     }
 
