@@ -56,6 +56,7 @@ int main(int argc, char *argv[]) {
         deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string((m - n) * 2));
     }
 
+
     // 创建主窗口
     MainWindow mainWindow(deviceTable, deviceQueue, 1);
     mainWindow.show();
