@@ -18,7 +18,7 @@ class DeviceWindow : public QMainWindow {
 
 public:
     explicit DeviceWindow(QString deviceType = "none", QString deviceName = "none", QWidget *parent = nullptr) : QMainWindow(parent) {
-        setWindowTitle(deviceName);
+        setWindowTitle("Device: " + deviceName);
         centralWidget = new QWidget(this);
         setCentralWidget(centralWidget);
         layout = new QVBoxLayout(centralWidget);
@@ -60,8 +60,8 @@ class DeviceMainWindow : public QMainWindow {
 
 public:
     explicit DeviceMainWindow(DeviceTable &deviceTable, DeviceQueue &deviceQueue, int logger = 0, QWidget *parent = nullptr)
-     : QMainWindow(parent), deviceTable(deviceTable), deviceQueue(deviceQueue) {
-        setWindowTitle("Main Window");
+     : QMainWindow(parent), deviceTable(deviceTable), deviceQueue(deviceQueue), logger(logger) {
+        setWindowTitle("DeviceWindow");
         centralWidget = new QWidget(this);
         setCentralWidget(centralWidget);
         layout = new QVBoxLayout(centralWidget);
@@ -99,9 +99,9 @@ public slots:
         // 更新设备状态显示
         QString statusText;
         for (const auto &device : deviceTable.deviceList) {
-            statusText += "Device Name: " + QString::fromStdString(device.name) + "  |  Type: "\
-             + QString::fromStdString(device.type) + "  |  Status: " + (device.status ? "Busy" : "Free")\
-             + "  |  Process: " + QString::fromStdString(device.pname) + "\n";
+            statusText += "DeviceName: " + QString::fromStdString(device.name) + "  |  Type: "\
+             + QString::fromStdString(device.type) + "  |  DevicePriority: " + QString::number(device.priority)\ 
+             + "  |  Status: " + (device.status ? "Busy" : "Free") + "  |  Process: " + QString::fromStdString(device.pname) + "\n";
             if (device.type == "screen") {
                 // 更新屏幕设备窗口的状态
                 screenWindows[device.name]->setStatus(device.status);
@@ -117,9 +117,16 @@ public slots:
     void running(){
         // 获取occupied_devices
         map<string, vector<DevRequest>> occupied_devices = deviceQueue.get_occupied_devices();
+        // 获取最高优先级
+        int max_priority = 0;
+        for(auto device : occupied_devices){
+            int priority = deviceTable[device.first].priority;
+            if(priority > max_priority) max_priority = priority;
+        }
         // 遍历occupied_devices
         for(auto device : occupied_devices){
             string device_name = device.first;
+            if(deviceTable[device_name].priority < max_priority) continue; // 优先级不是最高的设备不执行
             vector<DevRequest> requests = device.second;
             if(requests.size() == 0) continue;
             string process_name = requests[0].pname;

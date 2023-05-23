@@ -32,7 +32,7 @@ void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
 // ===== Test =====
 int main() {
     DeviceTable device_table;
-    device_table.add_device("printer1", "printer");
+    device_table.add_device("printer1", "printer", 1);
     device_table.add_device("printer2", "printer");
     device_table.add_device("screen", "screen");
     device_table.add_device("abc", "abc");

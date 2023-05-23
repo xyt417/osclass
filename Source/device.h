@@ -29,8 +29,8 @@ public:
         string name;
         string type;
         int status;
-        string pname;   //占用或将占用的进程
-        int priority;
+        string pname;   // 占用或将占用的进程
+        int priority;   // 设备优先级
     };
 
 public:
@@ -51,14 +51,14 @@ public:
         return temp;
     }
 
-    bool add_device(string name, string type) {
+    bool add_device(string name, string type, int priority = 0) {
         // 不允许重名设备
         for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
             if (it->name == name) {
                 return false;
             }
         }
-        Device new_device {name, type, FREE, "none"};
+        Device new_device {name, type, FREE, "none", priority};
         deviceList.push_back(new_device);
         devNum ++;
         return true;
@@ -109,9 +109,9 @@ public:
     }
 
     void printInfo() {
-        cout << "|DeviceName" << "|Type" << "|Status" << "|process|\n";
+        cout << "|DeviceName" << "|Type" << "|priority" << "|Status" << "|process|\n";
         for (auto it : deviceList) {
-            cout << "  " << it.name << "  " << it.type << "  " << (it.status ? "busy" : "free") << "  " << it.pname << "  \n";
+            cout << "  " << it.name << "  " << it.type << "  " << it.priority << "  " << (it.status ? "busy" : "free") << "  " << it.pname << "  \n";
         }
     }
 };

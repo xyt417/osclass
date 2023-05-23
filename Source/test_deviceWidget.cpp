@@ -31,14 +31,38 @@ void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
     cout << "=============================" << endl;
 }
 
+class MyThread : public QThread {
+private:
+    DeviceQueue &deviceQueue;
+public:
+    MyThread(DeviceQueue &deviceQueue) : deviceQueue(deviceQueue) {}
+    void run() override {
+      // Test
+        int n = 100, m = 100;
+        while(n --){
+            deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n), 1);
+            deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n), 2);
+            deviceQueue.allocate_device("printer", "p3", "print,p3: hello printer num:" + to_string(m - n));
+            deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
+            deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
+        }
+        // QTimer 暂停5秒再往后执行
+        QThread::msleep(3000);
+        n = 30, m = 30;
+        while(n --){
+            deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string(m - n));
+            deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string(m - n));
+            deviceQueue.allocate_device("screen", "p3", "print,p3: hello screen num:" + to_string(m - n));
+        }
+    }
+};
+
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
-
-
     // 创建设备信息表并添加设备
     DeviceTable deviceTable;
-    deviceTable.add_device("screen1", "screen");
+    deviceTable.add_device("screen1", "screen", 1);
     deviceTable.add_device("printer1", "printer");
     deviceTable.add_device("printer2", "printer");
     deviceTable.add_device("printer3", "printer");
@@ -49,18 +73,8 @@ int main(int argc, char *argv[]) {
     DeviceMainWindow deviceMainWindow(deviceTable, deviceQueue, 1);
     deviceMainWindow.show();
 
-    // Test
-    int n = 100, m = 100;
-    while(n --){
-        deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n), 1);
-        deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n), 2);
-        deviceQueue.allocate_device("printer", "p3", "print,p3: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string(m - n));
-        deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string(m - n));
-        deviceQueue.allocate_device("screen", "p3", "print,p3: hello screen num:" + to_string(m - n));
-    }
+    MyThread thread(deviceQueue);
+    thread.start();
 
     return app.exec();
 }
