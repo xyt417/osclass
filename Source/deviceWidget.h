@@ -42,6 +42,7 @@ public:
 
     void print(const QString& text) {
         printerWidget->insertPlainText(text + '\n');
+        printerWidget->moveCursor(QTextCursor::End);
         printerWidget->verticalScrollBar()->setValue(printerWidget->verticalScrollBar()->maximum());
     }
 
@@ -54,11 +55,11 @@ private:
 
 
 // 主窗口类
-class MainWindow : public QMainWindow {
+class DeviceMainWindow : public QMainWindow {
     Q_OBJECT
 
 public:
-    explicit MainWindow(DeviceTable &deviceTable, DeviceQueue &deviceQueue, int logger = 0, QWidget *parent = nullptr)
+    explicit DeviceMainWindow(DeviceTable &deviceTable, DeviceQueue &deviceQueue, int logger = 0, QWidget *parent = nullptr)
      : QMainWindow(parent), deviceTable(deviceTable), deviceQueue(deviceQueue) {
         setWindowTitle("Main Window");
         centralWidget = new QWidget(this);
@@ -130,8 +131,9 @@ public slots:
                     if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
                     screenWindows["screen1"]->print(QString::fromStdString(argi(request, 2)));
                 }
+            // printer
             }else if(deviceTable[device_name].type == "printer"){
-                // request = "print,p1: text"
+                // request = "print,text"
                 // 打印机打印
                 if(request.find("print") != string::npos){
                     if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
@@ -168,8 +170,8 @@ private:
     QVBoxLayout *layout;
     QLabel *statusLabel;
     QTimer *timer;
-    DeviceTable &deviceTable;
-    DeviceQueue &deviceQueue;
+    DeviceTable &deviceTable; // 引用设备信息表
+    DeviceQueue &deviceQueue; // 引用设备队列
     QMap<string, DeviceWindow*> screenWindows; // 屏幕设备窗口
     QMap<string, DeviceWindow*> printerWindows; // 打印机设备窗口
 };

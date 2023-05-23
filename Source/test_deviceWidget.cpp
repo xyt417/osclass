@@ -1,6 +1,6 @@
 #include<deviceWidget.h>
 #include<device.h>
-
+// device类命令行输出测试:
 void allocateDevice(string device, string process, DeviceQueue &deviceQueue, string request = ""){
     bool result = deviceQueue.allocate_device(device, process, request); 
     if (result) {
@@ -35,6 +35,7 @@ int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
 
+
     // 创建设备信息表并添加设备
     DeviceTable deviceTable;
     deviceTable.add_device("screen1", "screen");
@@ -44,22 +45,22 @@ int main(int argc, char *argv[]) {
     // 使用设备信息表初始化设备队列
     DeviceQueue deviceQueue(deviceTable);
 
+    // 创建设备管理窗口
+    DeviceMainWindow deviceMainWindow(deviceTable, deviceQueue, 1);
+    deviceMainWindow.show();
+
+    // Test
     int n = 100, m = 100;
     while(n --){
         deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n));
         deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n));
         deviceQueue.allocate_device("printer", "p3", "print,p3: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("printer", "p4", "print,p4: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("printer", "p5", "print,p5: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("printer", "p6", "print,p6: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string((m - n) * 2 - 1));
-        deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string((m - n) * 2));
+        deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string(m - n));
+        deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string(m - n));
+        deviceQueue.allocate_device("screen", "p3", "print,p3: hello screen num:" + to_string(m - n));
     }
-
-
-    // 创建主窗口
-    MainWindow mainWindow(deviceTable, deviceQueue, 1);
-    mainWindow.show();
 
     return app.exec();
 }

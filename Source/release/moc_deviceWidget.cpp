@@ -116,31 +116,31 @@ int DeviceWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 namespace {
 
 #ifdef QT_MOC_HAS_STRINGDATA
-struct qt_meta_stringdata_CLASSMainWindowENDCLASS_t {};
-static constexpr auto qt_meta_stringdata_CLASSMainWindowENDCLASS = QtMocHelpers::stringData(
-    "MainWindow",
+struct qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS_t {};
+static constexpr auto qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS = QtMocHelpers::stringData(
+    "DeviceMainWindow",
     "updateDeviceStatus",
     "",
     "running"
 );
 #else  // !QT_MOC_HAS_STRING_DATA
-struct qt_meta_stringdata_CLASSMainWindowENDCLASS_t {
+struct qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS_t {
     uint offsetsAndSizes[8];
-    char stringdata0[11];
+    char stringdata0[17];
     char stringdata1[19];
     char stringdata2[1];
     char stringdata3[8];
 };
 #define QT_MOC_LITERAL(ofs, len) \
-    uint(sizeof(qt_meta_stringdata_CLASSMainWindowENDCLASS_t::offsetsAndSizes) + ofs), len 
-Q_CONSTINIT static const qt_meta_stringdata_CLASSMainWindowENDCLASS_t qt_meta_stringdata_CLASSMainWindowENDCLASS = {
+    uint(sizeof(qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS_t::offsetsAndSizes) + ofs), len 
+Q_CONSTINIT static const qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS_t qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS = {
     {
-        QT_MOC_LITERAL(0, 10),  // "MainWindow"
-        QT_MOC_LITERAL(11, 18),  // "updateDeviceStatus"
-        QT_MOC_LITERAL(30, 0),  // ""
-        QT_MOC_LITERAL(31, 7)   // "running"
+        QT_MOC_LITERAL(0, 16),  // "DeviceMainWindow"
+        QT_MOC_LITERAL(17, 18),  // "updateDeviceStatus"
+        QT_MOC_LITERAL(36, 0),  // ""
+        QT_MOC_LITERAL(37, 7)   // "running"
     },
-    "MainWindow",
+    "DeviceMainWindow",
     "updateDeviceStatus",
     "",
     "running"
@@ -149,7 +149,7 @@ Q_CONSTINIT static const qt_meta_stringdata_CLASSMainWindowENDCLASS_t qt_meta_st
 #endif // !QT_MOC_HAS_STRING_DATA
 } // unnamed namespace
 
-Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
+Q_CONSTINIT static const uint qt_meta_data_CLASSDeviceMainWindowENDCLASS[] = {
 
  // content:
       11,       // revision
@@ -173,15 +173,15 @@ Q_CONSTINIT static const uint qt_meta_data_CLASSMainWindowENDCLASS[] = {
        0        // eod
 };
 
-Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
+Q_CONSTINIT const QMetaObject DeviceMainWindow::staticMetaObject = { {
     QMetaObject::SuperData::link<QMainWindow::staticMetaObject>(),
-    qt_meta_stringdata_CLASSMainWindowENDCLASS.offsetsAndSizes,
-    qt_meta_data_CLASSMainWindowENDCLASS,
+    qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS.offsetsAndSizes,
+    qt_meta_data_CLASSDeviceMainWindowENDCLASS,
     qt_static_metacall,
     nullptr,
-    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSMainWindowENDCLASS_t,
+    qt_incomplete_metaTypeArray<qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS_t,
         // Q_OBJECT / Q_GADGET
-        QtPrivate::TypeAndForceComplete<MainWindow, std::true_type>,
+        QtPrivate::TypeAndForceComplete<DeviceMainWindow, std::true_type>,
         // method 'updateDeviceStatus'
         QtPrivate::TypeAndForceComplete<void, std::false_type>,
         // method 'running'
@@ -190,10 +190,10 @@ Q_CONSTINIT const QMetaObject MainWindow::staticMetaObject = { {
     nullptr
 } };
 
-void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
+void DeviceMainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, void **_a)
 {
     if (_c == QMetaObject::InvokeMetaMethod) {
-        auto *_t = static_cast<MainWindow *>(_o);
+        auto *_t = static_cast<DeviceMainWindow *>(_o);
         (void)_t;
         switch (_id) {
         case 0: _t->updateDeviceStatus(); break;
@@ -204,20 +204,20 @@ void MainWindow::qt_static_metacall(QObject *_o, QMetaObject::Call _c, int _id, 
     (void)_a;
 }
 
-const QMetaObject *MainWindow::metaObject() const
+const QMetaObject *DeviceMainWindow::metaObject() const
 {
     return QObject::d_ptr->metaObject ? QObject::d_ptr->dynamicMetaObject() : &staticMetaObject;
 }
 
-void *MainWindow::qt_metacast(const char *_clname)
+void *DeviceMainWindow::qt_metacast(const char *_clname)
 {
     if (!_clname) return nullptr;
-    if (!strcmp(_clname, qt_meta_stringdata_CLASSMainWindowENDCLASS.stringdata0))
+    if (!strcmp(_clname, qt_meta_stringdata_CLASSDeviceMainWindowENDCLASS.stringdata0))
         return static_cast<void*>(this);
     return QMainWindow::qt_metacast(_clname);
 }
 
-int MainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
+int DeviceMainWindow::qt_metacall(QMetaObject::Call _c, int _id, void **_a)
 {
     _id = QMainWindow::qt_metacall(_c, _id, _a);
     if (_id < 0)
