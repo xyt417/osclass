@@ -1,17 +1,17 @@
 #include<deviceWidget.h>
 #include<device.h>
 // device类命令行输出测试:
-void allocateDevice(string device, string process, DeviceQueue &deviceQueue, string request = ""){
-    bool result = deviceQueue.allocate_device(device, process, request); 
+void allocateDevice(string device, string process, DeviceQueue &device_queue, string request = "", int priority = 0){
+    bool result = device_queue.allocate_device(device, process, request, priority); 
     if (result) {
         cout << "进程 " << process << " 成功请求到设备 " << device << endl;
     }else {
         cout << "设备类型 " << device << " 不存在" << endl;
     }
 }
-void runDevice(string device, DeviceQueue &deviceQueue){
+void runDevice(string device, DeviceQueue &device_queue){
     string process;
-    deviceQueue.release_device(device, process);
+    device_queue.release_device(device, process);
     if(process == NOEXIST) {
         cout << "设备 " << device << " 不存在" << endl;
         return;
@@ -22,12 +22,12 @@ void runDevice(string device, DeviceQueue &deviceQueue){
     }
     cout << "设备 " << device << " 已执行进程 " << process << " 的任务" << endl;
 }
-void printInfo(DeviceQueue &deviceQueue, DeviceTable &deviceTable){
+void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
     cout << "==== DeviceQueue Status =====" << endl;
-    deviceQueue.print_avaliable_devices();
-    deviceQueue.print_occupied_devices();
+    device_queue.print_avaliable_devices();
+    device_queue.print_occupied_devices();
     cout << "======= Device Table ========" << endl;
-    deviceTable.printInfo();
+    device_table.printInfo();
     cout << "=============================" << endl;
 }
 
@@ -52,8 +52,8 @@ int main(int argc, char *argv[]) {
     // Test
     int n = 100, m = 100;
     while(n --){
-        deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n));
-        deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n));
+        deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n), 1);
+        deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n), 2);
         deviceQueue.allocate_device("printer", "p3", "print,p3: hello printer num:" + to_string(m - n));
         deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
         deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));

@@ -1,6 +1,6 @@
 #include <device.h>
-void allocateDevice(string device, string process, DeviceQueue &device_queue, string request = ""){
-    bool result = device_queue.allocate_device(device, process, request); 
+void allocateDevice(string device, string process, DeviceQueue &device_queue, string request = "", int priority = 0){
+    bool result = device_queue.allocate_device(device, process, request, priority); 
     if (result) {
         cout << "进程 " << process << " 成功请求到设备 " << device << endl;
     }else {
@@ -44,9 +44,9 @@ int main() {
     allocateDevice("abc", "p1", device_queue);
     allocateDevice("printer", "p1", device_queue);
     allocateDevice("printer", "p2", device_queue);
-    allocateDevice("printer", "p3", device_queue);
-    allocateDevice("printer", "p4", device_queue);
-    allocateDevice("printer", "p5", device_queue, "print AAA");
+    allocateDevice("printer", "p3", device_queue, "print", 1);
+    allocateDevice("printer", "p4", device_queue, "print", 1);
+    allocateDevice("printer", "p5", device_queue, "print hello", 2);
     allocateDevice("screen", "p1", device_queue);
     allocateDevice("screen", "p2", device_queue);
     printInfo(device_queue, device_table);

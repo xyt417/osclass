@@ -17,8 +17,9 @@ using namespace std;
 
 
 struct DevRequest {
-    string pname;
-    string requestStr;
+    string pname;       // 进程名
+    string requestStr;  // 任务信息
+    int priority;       // 任务优先级
 };
 
 // 设备信息表
@@ -29,6 +30,7 @@ public:
         string type;
         int status;
         string pname;   //占用或将占用的进程
+        int priority;
     };
 
 public:
@@ -39,6 +41,7 @@ public:
     DeviceTable() : devNum(0) {}
 
     Device operator[](string name){
+        // 根据设备名获取设备信息
         for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
             if (it->name == name) {
                 return *it;
@@ -49,6 +52,7 @@ public:
     }
 
     bool add_device(string name, string type) {
+        // 不允许重名设备
         for (vector<Device>::iterator it = deviceList.begin(); it != deviceList.end(); ++ it) {
             if (it->name == name) {
                 return false;
@@ -116,11 +120,11 @@ public:
 // 设备队列类
 class DeviceQueue {
 private:
-    DeviceTable &deviceTable;                       // 设备信息表
+    DeviceTable &deviceTable;                           // 设备信息表
 
-    vector<string> devices;                         // 设备名列表
-    vector<string> types;                           // 设备类型列表
-    vector<string> available_devices;               // 可用设备列表
+    vector<string> devices;                             // 设备名列表
+    vector<string> types;                               // 设备类型列表
+    vector<string> available_devices;                   // 可用设备列表
     map<string, vector<DevRequest>> occupied_devices;   // 正在使用的设备字典，键为设备名，值为使用该设备的进程列表
 
 public:
@@ -134,8 +138,8 @@ public:
         // for (auto it : types) cout << it << " ";
     }
 
-
-    bool _allocate_device(string device_name, string process_name, string request) {
+    // 分配设备给进程 (设备类型，进程名称，任务信息, 任务优先级)
+    bool _allocate_device(string device_name, string process_name, string request, int priority) {
         // 如果设备不存在，则返回 false
         vector<string>::iterator it = find(devices.begin(), devices.end(), device_name);
         if (it == devices.end()) {
@@ -144,21 +148,32 @@ public:
 
         // 如果设备已经被使用，则将进程添加到设备的使用列表中
         if (occupied_devices.find(device_name) != occupied_devices.end()) {
-            occupied_devices[device_name].push_back(DevRequest{process_name, request});
+            if(priority == 0 || occupied_devices[device_name].size() == 1) // 默认优先级或只有一个处理中的任务，直接添加到队列尾部
+                occupied_devices[device_name].push_back(DevRequest{process_name, request, priority});
+            else{
+                // 非默认优先级，添加到队列中合适的位置
+                vector<DevRequest>& processes = occupied_devices[device_name];
+                for(auto it = processes.begin() + 1; it != processes.end(); ++ it){
+                    if(it->priority < priority){
+                        processes.insert(it, DevRequest{process_name, request, priority});
+                        break;
+                    }
+                }
+            }
         }
         // 如果设备未被使用，则创建一个新的使用列表并添加进程，并将该设备移出空闲列表
         else {
             it = find(available_devices.begin(), available_devices.end(), device_name);
             available_devices.erase(it);
             occupied_devices[device_name] = vector<DevRequest>{};
-            occupied_devices[device_name].push_back(DevRequest{process_name, request});
+            occupied_devices[device_name].push_back(DevRequest{process_name, request, priority});
             deviceTable.change_device_status(device_name, BUSY, process_name);
         }
         return true;
     }
 
-    // 分配设备给进程 (设备类型，进程名称，任务信息)
-    bool allocate_device(string device_type, string process_name, string request = "") {
+    // 分配设备给进程 (设备类型，进程名称，任务信息, 任务优先级)
+    bool allocate_device(string device_type, string process_name, string request = "", int priority = 0) {
         // 不存在该类型设备
         vector<string>::iterator itt = find(types.begin(), types.end(), device_type);
         if (itt == types.end()) {
@@ -167,7 +182,7 @@ public:
         // 存在空闲设备
         for(auto it = available_devices.begin(); it != available_devices.end(); ++ it) {
             if(deviceTable[*it].type == device_type) {
-                return _allocate_device(*it, process_name, request);
+                return _allocate_device(*it, process_name, request, priority);
             }
         }
 
@@ -182,7 +197,7 @@ public:
             }
         }
 
-        return _allocate_device(device_name, process_name, request);
+        return _allocate_device(device_name, process_name, request, priority);
     }
 
     // 释放设备 (设备名称, 确认结束任务对应进程名，备用)
@@ -245,7 +260,7 @@ public:
             vector<DevRequest> processes = pair.second;
             cout << device_name << ": ";
             for (DevRequest process : processes) {
-                cout << process.pname << "[" << process.requestStr << "]" << " ";
+                cout << process.pname << "[\"" << process.requestStr << "\"" << ":" << process.priority << "]" << " ";
             }
             cout << '\n';
         }
@@ -253,5 +268,3 @@ public:
 };
 
 #endif
-
-// thinking: 进程每次申请一个操作

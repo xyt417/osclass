@@ -117,6 +117,7 @@ public slots:
     void running(){
         // ªÒ»°occupied_devices
         map<string, vector<DevRequest>> occupied_devices = deviceQueue.get_occupied_devices();
+        // ±È¿˙occupied_devices
         for(auto device : occupied_devices){
             string device_name = device.first;
             vector<DevRequest> requests = device.second;
