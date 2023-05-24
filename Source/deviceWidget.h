@@ -73,6 +73,7 @@ public:
         ifstream infile("release/Disk/block" + to_string(blockIndex) + ".txt");
         if(!infile.is_open()) return FILE_ERR; // 文件打开失败
         infile.seekg(byteIndex, ios::beg); // 定位到第byteIndex个字节  ios::beg: 文件开头
+        text.clear(); // 清空text
         text.resize(length); // 重置text大小
         infile.read(&text[0], length); // 读取length个字节
         infile.close();
@@ -232,14 +233,14 @@ public slots:
                 }
             }else if (request.find("read") != std::string::npos) {
                 // 读取磁盘
-                // request = "read,blockIndex,byteIndex,length"
+                // request = "read,blockIndex,byteIndex,length,buffernum"
                 int blockIndex = std::stoi(argi(request, 2));
                 int byteIndex = std::stoi(argi(request, 3));
                 int length = std::stoi(argi(request, 4));
+                int buffernum = std::stoi(argi(request, 5));
                 
                 int flag;
-                string content;
-                if((flag = diskWindows[device_name]->readFromFile(blockIndex, byteIndex, length, content)) == SUCCESS){
+                if((flag = diskWindows[device_name]->readFromFile(blockIndex, byteIndex, length, deviceQueue.readInBuffer[buffernum])) == SUCCESS){
                     if(logger)
                         std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
 
@@ -247,7 +248,7 @@ public slots:
                     QString taskInfo = "Read Task - Block: " + QString::number(blockIndex) +
                                     ", Byte: " + QString::number(byteIndex) +
                                     ", Length: " + QString::number(length) +
-                                    ", Content: " + QString::fromStdString(content);
+                                    ", Content: " + QString::fromStdString(deviceQueue.readInBuffer[buffernum]);
                     diskWindows[device_name]->print(taskInfo);
                 }else if(flag == OVERSTEP){
                     // 处理越界情况

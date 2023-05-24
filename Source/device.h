@@ -136,6 +136,9 @@ public:
         }
         deviceTable.get_types(types);
         // for (auto it : types) cout << it << " ";
+
+        // 初始化 buffer
+        readInBuffer = vector<string>(1000, "");
     }
 
     // 分配设备给进程 (设备类型，进程名称，任务信息, 任务优先级)
@@ -265,6 +268,10 @@ public:
             cout << '\n';
         }
     }
+
+public:
+    // 设置1000个buffer
+    vector<string> readInBuffer;
 };
 
 #endif
