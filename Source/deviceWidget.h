@@ -72,17 +72,21 @@ public:
         createDeviceWindows();
         updateDeviceStatus();
 
+        // 初始化设备指针
+        occupied_devices = deviceQueue.get_occupied_devices();
+        devicePointer = occupied_devices.begin();
+
         // 设置定时器
         timer = new QTimer(this);
         connect(timer, SIGNAL(timeout()), this, SLOT(running()));
-        timer->start(100); // 每1/10更新1次
+        timer->start(10); // 处理频率 10ms
 
     }
 
     void enableLogger() {logger = 1;}
     void disableLogger() {logger = 0;}
 
-    string argi(string request, int index){
+    string argi(string request, int index){ // 请求的第 i 个参数
         int i = 1;
         int start = 0;
         int end = request.find(",");
@@ -113,45 +117,46 @@ public slots:
         statusLabel->setText(statusText);
     }
 
-
     void running(){
-        // 获取occupied_devices
-        map<string, vector<DevRequest>> occupied_devices = deviceQueue.get_occupied_devices();
-        // 获取最高优先级
-        int max_priority = 0;
-        for(auto device : occupied_devices){
-            int priority = deviceTable[device.first].priority;
-            if(priority > max_priority) max_priority = priority;
+        // 更新occupied_devices
+        if(devicePointer == occupied_devices.end()){
+            occupied_devices = deviceQueue.get_occupied_devices();
+            devicePointer = occupied_devices.begin();
+            // 更新max_priority
+            max_priority = 0;
+            for(auto device : occupied_devices){
+                int priority = deviceTable[device.first].priority;
+                if(priority > max_priority) max_priority = priority;
+            }
         }
         // 遍历occupied_devices
-        for(auto device : occupied_devices){
-            string device_name = device.first;
-            if(deviceTable[device_name].priority < max_priority) continue; // 优先级不是最高的设备不执行
-            vector<DevRequest> requests = device.second;
-            if(requests.size() == 0) continue;
-            string process_name = requests[0].pname;
-            string request = requests[0].requestStr;
-            // screen
-            if(deviceTable[device_name].type == "screen"){
-                // request = "print,text"
-                // 屏幕打印
-                if(request.find("print") != string::npos){
-                    if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
-                    screenWindows["screen1"]->print(QString::fromStdString(argi(request, 2)));
-                }
-            // printer
-            }else if(deviceTable[device_name].type == "printer"){
-                // request = "print,text"
-                // 打印机打印
-                if(request.find("print") != string::npos){
-                    if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
-                    printerWindows[device_name]->print(QString::fromStdString(argi(request, 2)));
-                }
+        while(devicePointer != occupied_devices.end() && deviceTable[devicePointer->first].priority < max_priority)
+            ++ devicePointer; // 优先级不是最高的设备不执行
+        if(devicePointer == occupied_devices.end()) return;
+        string device_name = devicePointer->first;
+        vector<DevRequest> requests = devicePointer->second;
+        string process_name = requests[0].pname;
+        string request = requests[0].requestStr;
+        // screen
+        if(deviceTable[device_name].type == "screen"){
+            // request = "print,text"
+            // 屏幕打印
+            if(request.find("print") != string::npos){
+                if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
+                screenWindows["screen1"]->print(QString::fromStdString(argi(request, 2)));
             }
-            // 释放设备
-            deviceQueue.release_device(device_name, process_name);
+        // printer
+        }else if(deviceTable[device_name].type == "printer"){
+            // request = "print,text"
+            // 打印机打印
+            if(request.find("print") != string::npos){
+                if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
+                printerWindows[device_name]->print(QString::fromStdString(argi(request, 2)));
+            }
         }
-
+        // 释放设备
+        deviceQueue.release_device(device_name, process_name);
+        ++ devicePointer;
         updateDeviceStatus();
     }    
 
@@ -173,6 +178,11 @@ private:
     }
 
     int logger = 0;
+
+    // running遍历使用
+    map<string, vector<DevRequest>>::iterator devicePointer; // 设备指针
+    map<string, vector<DevRequest>> occupied_devices; // 临时设备字典
+    int max_priority = 0; // 最高优先级
 
     QWidget *centralWidget;
     QVBoxLayout *layout;

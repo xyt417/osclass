@@ -46,13 +46,20 @@ public:
             deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
             deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
         }
-        // QTimer ‘›Õ£5√Î‘ŸÕ˘∫Û÷¥––
+        // ‘›Õ£ 3 √Î
         QThread::msleep(3000);
         n = 30, m = 30;
         while(n --){
             deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string(m - n));
             deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string(m - n));
             deviceQueue.allocate_device("screen", "p3", "print,p3: hello screen num:" + to_string(m - n));
+        }
+        // ‘›Õ£ 10 √Î
+        QThread::msleep(10000);
+        n = 200, m = 200;
+        while(n --){
+            deviceQueue.allocate_device("screen", "p0", "print,p0: hello screen num:" + to_string(m - n));
+            deviceQueue.allocate_device("printer", "p0", "print,p0: hello screen num:" + to_string(m - n));
         }
     }
 };
