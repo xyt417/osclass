@@ -1,5 +1,6 @@
 #include<deviceWidget.h>
 #include<device.h>
+#include<MyThread.h>
 // device类命令行输出测试:
 void allocateDevice(string device, string process, DeviceQueue &device_queue, string request = "", int priority = 0){
     bool result = device_queue.allocate_device(device, process, request, priority); 
@@ -31,38 +32,7 @@ void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
     cout << "=============================" << endl;
 }
 
-class MyThread : public QThread {
-private:
-    DeviceQueue &deviceQueue;
-public:
-    MyThread(DeviceQueue &deviceQueue) : deviceQueue(deviceQueue) {}
-    void run() override {
-      // Test
-        int n = 100, m = 100;
-        while(n --){
-            deviceQueue.allocate_device("printer", "p1", "print,p1: hello printer num:" + to_string(m - n), 1);
-            deviceQueue.allocate_device("printer", "p2", "print,p2: hello printer num:" + to_string(m - n), 2);
-            deviceQueue.allocate_device("printer", "p3", "print,p3: hello printer num:" + to_string(m - n));
-            deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
-            deviceQueue.allocate_device("printer", "p0", "print,p0: hello printer num:" + to_string(m - n));
-        }
-        // 暂停 3 秒
-        QThread::msleep(3000);
-        n = 30, m = 30;
-        while(n --){
-            deviceQueue.allocate_device("screen", "p1", "print,p1: hello screen num:" + to_string(m - n));
-            deviceQueue.allocate_device("screen", "p2", "print,p2: hello screen num:" + to_string(m - n));
-            deviceQueue.allocate_device("screen", "p3", "print,p3: hello screen num:" + to_string(m - n));
-        }
-        // 暂停 10 秒
-        QThread::msleep(10000);
-        n = 200, m = 200;
-        while(n --){
-            deviceQueue.allocate_device("screen", "p0", "print,p0: hello screen num:" + to_string(m - n));
-            deviceQueue.allocate_device("printer", "p0", "print,p0: hello screen num:" + to_string(m - n));
-        }
-    }
-};
+
 
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
@@ -80,7 +50,8 @@ int main(int argc, char *argv[]) {
     DeviceMainWindow deviceMainWindow(deviceTable, deviceQueue, 1);
     deviceMainWindow.show();
 
-    MyThread thread(deviceQueue);
+    // 其它线程模拟进程请求设备
+    MyThread thread(deviceQueue, deviceMainWindow);
     thread.start();
 
     return app.exec();

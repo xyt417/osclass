@@ -1,3 +1,5 @@
+#ifndef DEVICE_WIDGET
+#define DEVICE_WIDGET
 #include <QApplication>
 #include <QMainWindow>
 #include <QWidget>
@@ -160,6 +162,16 @@ public slots:
         updateDeviceStatus();
     }    
 
+    void stop() {
+        timer->stop();
+    }
+
+    void start() {
+        timer->start(10);
+    }
+
+
+
 private:
     void createDeviceWindows() {
         for (const auto &device : deviceTable.deviceList) {
@@ -193,3 +205,5 @@ private:
     QMap<string, DeviceWindow*> screenWindows; // 屏幕设备窗口
     QMap<string, DeviceWindow*> printerWindows; // 打印机设备窗口
 };
+
+#endif
