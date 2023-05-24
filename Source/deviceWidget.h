@@ -12,9 +12,19 @@
 #include <QTextEdit>
 #include <QPlainTextEdit>
 #include <QScrollBar>
-#include "device.h"
 
-// 自定义设备窗口类
+#include <fstream>
+
+#include <device.h>
+
+const int DISK_BLOCK_SIZE = 4096;  //定义磁盘块大小 (4096 Byte)
+const int DISK_BLOCK_NUM = 20;     //定义磁盘块数量 (20 Blocks)
+
+#define SUCCESS 0
+#define FILE_ERR 1
+#define OVERSTEP 2
+
+// 设备类
 class DeviceWindow : public QMainWindow {
     Q_OBJECT
 
@@ -27,8 +37,6 @@ public:
 
         // 显示部件
         printerWidget = new QPlainTextEdit(centralWidget);
-        if(deviceType == "printer")
-            printerWidget->setReadOnly(true);
         layout->addWidget(printerWidget);
         // 状态标签
         statusLabel = new QLabel("Status: Free", this);
@@ -48,11 +56,35 @@ public:
         printerWidget->verticalScrollBar()->setValue(printerWidget->verticalScrollBar()->maximum());
     }
 
+    int writeToFile(int blockIndex, int byteIndex, string text) {
+        if(blockIndex < 0 || blockIndex >= DISK_BLOCK_NUM) return OVERSTEP; // 磁盘块索引越界
+        if(byteIndex < 0 || byteIndex + text.size() >= DISK_BLOCK_SIZE) return OVERSTEP; // 字节索引越界
+        ofstream outfile("release/Disk/block" + to_string(blockIndex) + ".txt");
+        if(!outfile.is_open()) return FILE_ERR; // 文件打开失败
+        outfile.seekp(byteIndex, ios::beg); // 定位到第byteIndex个字节  ios::beg: 文件开头
+        outfile << text; // 写入text
+        outfile.close();
+        return SUCCESS;
+    }
+
+    int readFromFile(int blockIndex, int byteIndex, int length, string &text) {
+        if(blockIndex < 0 || blockIndex >= DISK_BLOCK_NUM) return OVERSTEP; // 磁盘块索引越界
+        if(byteIndex < 0 || byteIndex + length >= DISK_BLOCK_SIZE) return OVERSTEP; // 字节索引越界
+        ifstream infile("release/Disk/block" + to_string(blockIndex) + ".txt");
+        if(!infile.is_open()) return FILE_ERR; // 文件打开失败
+        infile.seekg(byteIndex, ios::beg); // 定位到第byteIndex个字节  ios::beg: 文件开头
+        text.resize(length); // 重置text大小
+        infile.read(&text[0], length); // 读取length个字节
+        infile.close();
+        return SUCCESS;
+    }    
+
 private:
     QWidget *centralWidget; // 中心窗口
     QVBoxLayout *layout; // 布局管理器
     QPlainTextEdit *printerWidget; // 打印机组件
     QLabel *statusLabel; // 状态标签
+
 };
 
 
@@ -114,6 +146,9 @@ public slots:
             } else if (device.type == "printer") {
                 // 更新打印机设备窗口的状态
                 printerWindows[device.name]->setStatus(device.status);
+            } else if (device.type == "disk") {
+                // 更新磁盘设备窗口的状态
+                diskWindows[device.name]->setStatus(device.status);
             }
         }
         statusLabel->setText(statusText);
@@ -155,11 +190,94 @@ public slots:
                 if(logger) cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
                 printerWindows[device_name]->print(QString::fromStdString(argi(request, 2)));
             }
-        }
+        // disk
+        }else if(deviceTable[device_name].type == "disk"){
+            if (request.find("write") != std::string::npos) {
+                // 写入磁盘
+                // request = "write,blockIndex,byteIndex,text"
+                int blockIndex = std::stoi(argi(request, 2));
+                int byteIndex = std::stoi(argi(request, 3));
+                string text = argi(request, 4);
+
+                int flag;
+                if ((flag = diskWindows[device_name]->writeToFile(blockIndex, byteIndex, text)) == SUCCESS) {
+                    if (logger)
+                        std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
+
+                    // 在窗口中显示任务信息
+                    QString taskInfo = "Write Task - Block: " + QString::number(blockIndex) +
+                                    ", Byte: " + QString::number(byteIndex) +
+                                    ", Text: " + QString::fromStdString(text);
+                    diskWindows[device_name]->print(taskInfo);
+                } else if (flag == OVERSTEP) {
+                    // 处理越界情况
+                    if (logger)
+                        std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务越界:[" << request << "]\n";
+
+                    // 在窗口中显示越界信息
+                    QString errorInfo = "Error: OverStep - Block: " + QString::number(blockIndex) +
+                                        ", Byte: " + QString::number(byteIndex) +
+                                        ", Text: " + QString::fromStdString(text);
+                    diskWindows[device_name]->print(errorInfo);
+                } else if (flag == FILE_ERR) {
+                    // 处理文件打开失败情况
+                    if (logger)
+                        std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务文件打开失败:[" << request << "]\n";
+
+                    // 在窗口中显示文件打开失败信息
+                    QString errorInfo = "Error: File Open Failed - Block: " + QString::number(blockIndex) +
+                                        ", Byte: " + QString::number(byteIndex) +
+                                        ", Text: " + QString::fromStdString(text);
+                    diskWindows[device_name]->print(errorInfo);
+                }
+            }else if (request.find("read") != std::string::npos) {
+                // 读取磁盘
+                // request = "read,blockIndex,byteIndex,length"
+                int blockIndex = std::stoi(argi(request, 2));
+                int byteIndex = std::stoi(argi(request, 3));
+                int length = std::stoi(argi(request, 4));
+                
+                int flag;
+                string content;
+                if((flag = diskWindows[device_name]->readFromFile(blockIndex, byteIndex, length, content)) == SUCCESS){
+                    if(logger)
+                        std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务:[" << request << "]\n";
+
+                    // 在窗口中显示任务信息
+                    QString taskInfo = "Read Task - Block: " + QString::number(blockIndex) +
+                                    ", Byte: " + QString::number(byteIndex) +
+                                    ", Length: " + QString::number(length) +
+                                    ", Content: " + QString::fromStdString(content);
+                    diskWindows[device_name]->print(taskInfo);
+                }else if(flag == OVERSTEP){
+                    // 处理越界情况
+                    if(logger)
+                        std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务越界:[" << request << "]\n";
+
+                    // 在窗口中显示越界信息
+                    QString errorInfo = "Error: OverStep - Block: " + QString::number(blockIndex) +
+                                        ", Byte: " + QString::number(byteIndex) +
+                                        ", Length: " + QString::number(length);
+                    diskWindows[device_name]->print(errorInfo);
+                }else if(flag == FILE_ERR){
+                    // 处理文件打开失败情况
+                    if(logger)
+                        std::cout << "设备 " << device_name << " 执行进程 " << process_name << " 的任务文件打开失败:[" << request << "]\n";
+
+                    // 在窗口中显示文件打开失败信息
+                    QString errorInfo = "Error: File Open Failed - Block: " + QString::number(blockIndex) +
+                                        ", Byte: " + QString::number(byteIndex) +
+                                        ", Length: " + QString::number(length);
+                    diskWindows[device_name]->print(errorInfo);
+                }
+
+            }
+        } // disk
+
         // 释放设备
         deviceQueue.release_device(device_name, process_name);
         ++ devicePointer;
-        updateDeviceStatus();
+        updateDeviceStatus(); // 更新设备状态显示
     }    
 
     void stop() {
@@ -169,7 +287,6 @@ public slots:
     void start() {
         timer->start(10);
     }
-
 
 
 private:
@@ -185,6 +302,11 @@ private:
                 DeviceWindow *printerWindow = new DeviceWindow("printer", QString::fromStdString(device.name), this);
                 printerWindows[device.name] = printerWindow;
                 printerWindow->show();
+            } else if (device.type == "disk") {
+                // 创建磁盘设备窗口
+                DeviceWindow *diskWindow = new DeviceWindow("disk", QString::fromStdString(device.name), this);
+                diskWindows[device.name] = diskWindow;
+                diskWindow->show();
             }
         }
     }
@@ -204,6 +326,7 @@ private:
     DeviceQueue &deviceQueue; // 引用设备队列
     QMap<string, DeviceWindow*> screenWindows; // 屏幕设备窗口
     QMap<string, DeviceWindow*> printerWindows; // 打印机设备窗口
+    QMap<string, DeviceWindow*> diskWindows; // 磁盘设备窗口
 };
 
 #endif

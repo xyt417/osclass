@@ -32,8 +32,6 @@ void printInfo(DeviceQueue &device_queue, DeviceTable &device_table){
     cout << "=============================" << endl;
 }
 
-
-
 int main(int argc, char *argv[]) {
     QApplication app(argc, argv);
 
@@ -43,6 +41,7 @@ int main(int argc, char *argv[]) {
     deviceTable.add_device("printer1", "printer");
     deviceTable.add_device("printer2", "printer");
     deviceTable.add_device("printer3", "printer");
+    deviceTable.add_device("disk1", "disk");
     // 使用设备信息表初始化设备队列
     DeviceQueue deviceQueue(deviceTable);
 
