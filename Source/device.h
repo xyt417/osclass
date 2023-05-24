@@ -156,12 +156,15 @@ public:
             else{
                 // 非默认优先级，添加到队列中合适的位置
                 vector<DevRequest>& processes = occupied_devices[device_name];
-                for(auto it = processes.begin() + 1; it != processes.end(); ++ it){
+                auto it = processes.begin() + 1;
+                for(; it != processes.end(); ++ it){
                     if(it->priority < priority){
                         processes.insert(it, DevRequest{process_name, request, priority});
                         break;
                     }
                 }
+                if(it == processes.end()) // 全为同一种高优先级，it到达队尾
+                    processes.push_back(DevRequest{process_name, request, priority});
             }
         }
         // 如果设备未被使用，则创建一个新的使用列表并添加进程，并将该设备移出空闲列表

@@ -42,10 +42,10 @@ public:
         }
         emit startSignal(); // 测试启动设备处理线程
         // 磁盘写入测试
-        deviceQueue.allocate_device("disk", "p0", "write,0,10,hello disk0.");
-        deviceQueue.allocate_device("disk", "p0", "write,1,10,hello disk1.");
-        deviceQueue.allocate_device("disk", "p1", "read,0,10,30,0");
-        deviceQueue.allocate_device("disk", "p1", "read,1,0,30,1");
+        deviceQueue.allocate_device("disk", "p0", "write,0,10,hello disk0.", 3);
+        deviceQueue.allocate_device("disk", "p0", "write,1,10,hello disk1.", 3);
+        deviceQueue.allocate_device("disk", "p1", "read,0,10,30,0", 3);
+        deviceQueue.allocate_device("disk", "p1", "read,1,0,30,1", 3);
 
         QThread::msleep(10000);
         cout << "buffer0:" << deviceQueue.readInBuffer[0] << endl;
