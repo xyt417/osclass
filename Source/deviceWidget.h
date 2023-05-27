@@ -172,19 +172,20 @@ public slots:
             occupied_devices = deviceQueue.get_occupied_devices();
             devicePointer = occupied_devices.begin();
             // 更新max_priority
-            max_priority = 0;
+            int _max_priority = 0;
             for(auto device : occupied_devices){
                 int priority = deviceTable[device.first].priority;
-                if(priority > max_priority) max_priority = priority;
+                if(priority > _max_priority) _max_priority = priority;
             }
+            max_priority = _max_priority;
             // 防饿死机制 running_v2
             while(running_record[max_priority] == 0){
                 -- max_priority;
                 if(max_priority == -1) {
                     resetRunningRecord();
-                    return;
+                    max_priority = _max_priority;
                 }
-                if(logger) cout << "防饿死机制: 优先级 " << max_priority << " 的设备不执行\n";
+                // else if(logger) cout << "防饿死机制: 优先级 " << max_priority + 1 << " 的设备不执行\n";
             }
             -- running_record[max_priority];
         }
